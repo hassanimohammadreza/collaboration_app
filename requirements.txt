@@ -1,0 +1,8 @@
+Django==6.0.2
+channels==4.3.2
+channels_redis==4.2.1
+uvicorn[standard]
+python-dotenv
+psycopg2==2.9.11
+redis==7.2.0
+channels_redis==4.2.1
