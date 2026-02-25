@@ -1,18 +1,52 @@
 {% load static %}
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light">
 <head>
     <meta charset="UTF-8">
-    <title>Collaboration</title>
+    <title>Collaboration Board</title>
+
+    <!-- Font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Modular CSS -->
+    <link rel="stylesheet" href="{% static 'collaboration/css/style.css' %}">
 </head>
+
 <body>
-    <h2>Realtime Collaboration</h2>
 
-    <input id="messageInput" type="text" placeholder="Type message">
-    <button id="sendBtn">Send</button>
+<div class="container">
 
-    <ul id="messages"></ul>
+    <h2 class="text-center">Realtime Task Board</h2>
 
-    <script src="{% static 'collaboration/js/tasks.js' %}"></script>
+    <div class="create-box">
+        <input id="taskInput" type="text" placeholder="New Task">
+        <button id="createBtn" class="btn btn-primary">Add Task</button>
+        <button id="themeToggle" class="btn">🌙</button>
+    </div>
+
+    <div class="board">
+
+        <div class="column">
+            <h3>To Do</h3>
+            <ul id="todo"></ul>
+        </div>
+
+        <div class="column">
+            <h3>In Progress</h3>
+            <ul id="in_progress"></ul>
+        </div>
+
+        <div class="column">
+            <h3>Done</h3>
+            <ul id="done"></ul>
+        </div>
+
+    </div>
+
+</div>
+
+<script src="{% static 'collaboration/js/tasks.js' %}"></script>
 </body>
 </html>
