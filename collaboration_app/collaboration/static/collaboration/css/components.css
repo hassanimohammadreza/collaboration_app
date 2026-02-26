@@ -7,6 +7,62 @@ input {
   color: var(--color-text);
 }
 
+/* ICON */
+
+.icon svg {
+  width: 22px;
+  height: 22px;
+}
+
+.icon svg path {
+  fill: currentColor;
+}
+
+/* THEME TOGGLE */
+
+#themeToggle {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 0;
+  transition: 
+    background-color 0.3s ease,
+    color 0.3s ease,
+    transform 0.15s ease;
+}
+
+#themeToggle svg {
+  width: 24px;
+  height: 24px;
+  display: block;
+}
+
+[data-theme="light"] #themeToggle {
+  color: #282828;
+}
+
+[data-theme="dark"] #themeToggle {
+  color: #f5f5f5;
+}
+
+#themeToggle:hover {
+  background: rgba(0, 0, 0, 0.08);
+}
+
+[data-theme="dark"] #themeToggle:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+#themeToggle:active {
+  transform: scale(0.9);
+}
+
 /* BUTTON */
 .btn {
   padding: 10px 18px;

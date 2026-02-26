@@ -23,7 +23,9 @@
     <div class="create-box">
         <input id="taskInput" type="text" placeholder="New Task">
         <button id="createBtn" class="btn btn-primary">Add Task</button>
-        <button id="themeToggle" class="btn">🌙</button>
+        <button id="themeToggle" class="btn icon">
+            <span id="themeIcon"></span>
+        </button>
     </div>
 
     <div class="board">
@@ -47,6 +49,9 @@
 
 </div>
 
+<script>
+    const themeIconPath = "{% static 'collaboration/icons/theme.svg' %}";
+</script>
 <script src="{% static 'collaboration/js/tasks.js' %}"></script>
 </body>
 </html>

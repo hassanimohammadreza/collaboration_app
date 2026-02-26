@@ -158,8 +158,20 @@ document.addEventListener("DOMContentLoaded", function () {
     ============================ */
 
     const themeToggle = document.getElementById("themeToggle");
+const iconContainer = document.getElementById("themeIcon");
 
-    if (themeToggle) {
+if (themeToggle && iconContainer) {
+
+        // Load SVG from Django static
+        fetch(themeIconPath)
+            .then(res => {
+                if (!res.ok) throw new Error("SVG not found");
+                return res.text();
+            })
+            .then(svg => {
+                iconContainer.innerHTML = svg;
+            })
+            .catch(err => console.error(err));
 
         // Load saved theme
         const savedTheme = localStorage.getItem("theme");
