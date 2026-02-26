@@ -1,35 +1,20 @@
-"""
-ASGI config for collaboration_app project.
-
-It exposes the ASGI callable as a module-level variable named ``application``.
-
-For more information on this file, see
-https://docs.djangoproject.com/en/6.0/howto/deployment/asgi/
-"""
-
 import os
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'collaboration_app.settings')
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "collaboration_app.settings")
 
-import django
-django.setup()
-
-from django.conf import settings
-from django.contrib.staticfiles.handlers import ASGIStaticFilesHandler
 from django.core.asgi import get_asgi_application
+
+django_asgi_app = get_asgi_application()
+
 from channels.routing import ProtocolTypeRouter, URLRouter
 from channels.auth import AuthMiddlewareStack
-from django.urls import path
-from collaboration.consumers import CollaborationConsumer
+import collaboration.routing
 
 application = ProtocolTypeRouter({
-    "http": get_asgi_application(),
+    "http": django_asgi_app,
     "websocket": AuthMiddlewareStack(
-        URLRouter([
-            path("ws/collaboration/", CollaborationConsumer.as_asgi()),
-        ])
+        URLRouter(
+            collaboration.routing.websocket_urlpatterns
+        )
     ),
 })
-
-if settings.DEBUG:
-    application = ASGIStaticFilesHandler(application)

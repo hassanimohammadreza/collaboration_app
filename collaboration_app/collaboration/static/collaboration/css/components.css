@@ -1,3 +1,13 @@
+/* ===============================
+   Motion Tokens
+================================ */
+:root {
+  --motion-fast: 140ms;
+  --motion-normal: 220ms;
+  --motion-slow: 320ms;
+  --ease-standard: cubic-bezier(.2,.8,.2,1);
+}
+
 /* INPUT */
 input {
   padding: 10px 14px;
@@ -18,8 +28,37 @@ input {
   fill: currentColor;
 }
 
-/* THEME TOGGLE */
+/* Connection Status */
+.connection-badge {
+  position: fixed;
+  top: 16px;
+  right: 20px;
+  padding: 6px 12px;
+  font-size: 13px;
+  font-weight: 500;
+  border-radius: 20px;
+  z-index: 9999;
+  transition: all 0.3s ease;
+}
 
+/* States */
+
+.connection-badge.connected {
+  background: rgba(46, 204, 113, 0.15);
+  color: #2ecc71;
+}
+
+.connection-badge.reconnecting {
+  background: rgba(241, 196, 15, 0.15);
+  color: #f1c40f;
+}
+
+.connection-badge.disconnected {
+  background: rgba(231, 76, 60, 0.15);
+  color: #e74c3c;
+}
+
+/* THEME TOGGLE */
 #themeToggle {
   width: 44px;
   height: 44px;
@@ -82,9 +121,12 @@ input {
   transform: scale(1.05);
 }
 
-.btn-danger {
-  background: var(--color-danger);
-  color: #fff;
+/* LOGOUT POSITION */
+.logout-box {
+  position: fixed;
+  top: 16px;
+  left: 20px;
+  z-index: 1000;
 }
 
 /* TASK CARD */
@@ -94,21 +136,31 @@ input {
   margin-bottom: 12px;
   border-radius: var(--radius);
   border: 1px solid var(--color-border);
-  background: var(--color-bg);
+  background: var(--color-panel-bg);
   box-shadow: var(--shadow-m);
   display: flex;
   justify-content: space-between;
   align-items: center;
   cursor: grab;
-  transition: all 0.2s ease;
+  will-change: transform;
+
+  transition:
+    transform var(--motion-normal) var(--ease-standard),
+    box-shadow var(--motion-fast) ease,
+    background-color var(--motion-normal) ease,
+    border-color var(--motion-normal) ease,
+    opacity var(--motion-fast) ease;
 }
 
 .task:hover {
-  transform: translateY(-3px);
+  transform: translateY(-4px);
   box-shadow: var(--shadow-l);
 }
 
 .task.dragging {
-  opacity: 0.6;
+  opacity: 0.5;
+  cursor: grabbing;
+  box-shadow: 0 12px 28px rgba(0,0,0,0.15);
+  transform: scale(1.02);
   border: 2px dashed var(--color-primary);
 }

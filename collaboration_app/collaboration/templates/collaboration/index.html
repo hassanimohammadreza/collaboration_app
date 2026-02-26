@@ -19,7 +19,15 @@
 <div class="container">
 
     <h2 class="text-center">Realtime Task Board</h2>
-
+    <div id="connectionStatus" class="connection-badge disconnected">
+        🔴 Disconnected
+    </div>
+    <div class="logout-box">
+        <form method="post" action="{% url 'logout' %}">
+            {% csrf_token %}
+            <button class="btn btn-danger">Logout</button>
+        </form>
+    </div>
     <div class="create-box">
         <input id="taskInput" type="text" placeholder="New Task">
         <button id="createBtn" class="btn btn-primary">Add Task</button>

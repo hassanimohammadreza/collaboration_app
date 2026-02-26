@@ -39,3 +39,31 @@
 .column ul {
   min-height: 200px;
 }
+
+/* AUTH PAGE */
+
+.auth-container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-bg);
+}
+
+.auth-card {
+  width: 100%;
+  max-width: 400px;
+  padding: 40px;
+  border-radius: var(--radius);
+  background: var(--color-panel-bg);
+  box-shadow: var(--shadow-l);
+  border: 1px solid var(--color-border);
+}
+
+.auth-form p {
+  margin-bottom: 16px;
+}
+
+.w-100 {
+  width: 100%;
+}

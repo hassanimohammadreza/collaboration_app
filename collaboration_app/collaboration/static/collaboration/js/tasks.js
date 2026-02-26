@@ -1,31 +1,154 @@
 document.addEventListener("DOMContentLoaded", function () {
 
-    const socket = new WebSocket(
-        'ws://' + window.location.host + '/ws/collaboration/'
-    );
-
+    let socket;
+    let reconnectAttempts = 0;
+    const maxReconnectDelay = 5000;
     let draggedTask = null;
 
+    const statusBadge = document.getElementById("connectionStatus");
     /* ============================
-       WebSocket Messages
+       FLIP Animation Engine
+    ============================ */
+    function springTo(element, dx, dy) {
+
+        if (element._springFrame) {
+            cancelAnimationFrame(element._springFrame);
+        }
+
+        let posX = dx;
+        let posY = dy;
+
+        let velocityX = 0;
+        let velocityY = 0;
+
+        const stiffness = 0.08;
+        const damping = 0.8;
+        const precision = 0.5;
+
+        function animate() {
+
+            const forceX = -stiffness * posX;
+            const forceY = -stiffness * posY;
+
+            velocityX = damping * (velocityX + forceX);
+            velocityY = damping * (velocityY + forceY);
+
+            posX += velocityX;
+            posY += velocityY;
+
+            element.style.transform = `translate(${posX}px, ${posY}px)`;
+
+            if (Math.abs(posX) > precision || Math.abs(posY) > precision) {
+                element._springFrame = requestAnimationFrame(animate);
+            } else {
+                element.style.transform = "";
+                element._springFrame = null;
+            }
+        }
+
+        element._springFrame = requestAnimationFrame(animate);
+    }
+    
+    function flipAnimate(callback) {
+
+        const first = new Map();
+        document.querySelectorAll(".task").forEach(el => {
+            first.set(el.id, el.getBoundingClientRect());
+        });
+
+        callback();
+
+        document.querySelectorAll(".task").forEach(el => {
+
+            const prev = first.get(el.id);
+            if (!prev) return;
+
+            const last = el.getBoundingClientRect();
+            const dx = prev.left - last.left;
+            const dy = prev.top - last.top;
+
+            if (dx || dy) {
+                springTo(el, dx, dy);
+            }
+
+        });
+    }
+
+    /* ============================
+       Connection Status
     ============================ */
 
-    socket.onmessage = function (e) {
-        const data = JSON.parse(e.data);
-        const { type, payload } = data;
+    function updateStatus(state) {
+        if (!statusBadge) return;
 
-        if (type === "task_list") renderTaskList(payload);
-        if (type === "task_create") addTaskToDOM(payload);
-        if (type === "task_delete") removeTask(payload.id);
-        if (type === "task_update") updateTask(payload);
-    };
+        statusBadge.className = "connection-badge " + state;
+
+        if (state === "connected")
+            statusBadge.innerText = "🟢 Connected";
+
+        if (state === "reconnecting")
+            statusBadge.innerText = "🟡 Reconnecting...";
+
+        if (state === "disconnected")
+            statusBadge.innerText = "🔴 Disconnected";
+    }
+
+    /* ============================
+       WebSocket Connection
+    ============================ */
+
+    function connectWebSocket() {
+
+        updateStatus("reconnecting");
+
+        const protocol = window.location.protocol === "https:" ? "wss://" : "ws://";
+
+        socket = new WebSocket(
+            protocol + window.location.host + "/ws/collaboration/"
+        );
+
+        socket.onopen = function () {
+            reconnectAttempts = 0;
+            updateStatus("connected");
+        };
+
+        socket.onmessage = function (e) {
+            const data = JSON.parse(e.data);
+            const { type, payload } = data;
+
+            if (type === "task_list") renderTaskList(payload);
+            if (type === "task_create") addTaskToDOM(payload);
+            if (type === "task_delete") removeTask(payload.id);
+            if (type === "task_update") updateTask(payload);
+        };
+
+        socket.onclose = function () {
+            updateStatus("disconnected");
+
+            const timeout = Math.min(
+                1000 * Math.pow(2, reconnectAttempts),
+                maxReconnectDelay
+            );
+
+            reconnectAttempts++;
+            setTimeout(connectWebSocket, timeout);
+        };
+
+        socket.onerror = function () {
+            socket.close();
+        };
+    }
+
+    connectWebSocket();
 
     /* ============================
        Render Functions
     ============================ */
 
     function renderTaskList(tasks) {
-        document.querySelectorAll(".column ul").forEach(ul => ul.innerHTML = "");
+        document.querySelectorAll(".column ul")
+            .forEach(ul => ul.innerHTML = "");
+
         tasks.forEach(task => addTaskToDOM(task));
     }
 
@@ -36,7 +159,6 @@ document.addEventListener("DOMContentLoaded", function () {
         li.id = "task-" + task.id;
         li.draggable = true;
 
-        /* TEXT */
         const textSpan = document.createElement("span");
         textSpan.textContent = task.title;
 
@@ -44,7 +166,6 @@ document.addEventListener("DOMContentLoaded", function () {
             toggleStatus(task);
         });
 
-        /* DELETE BUTTON */
         const deleteBtn = document.createElement("button");
         deleteBtn.textContent = "✕";
         deleteBtn.className = "btn btn-danger";
@@ -57,9 +178,7 @@ document.addEventListener("DOMContentLoaded", function () {
         li.appendChild(textSpan);
         li.appendChild(deleteBtn);
 
-        /* =====================
-           Drag Events
-        ===================== */
+        /* Drag events */
 
         li.addEventListener("dragstart", function () {
             li.classList.add("dragging");
@@ -76,9 +195,16 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     function updateTask(task) {
-        const existing = document.getElementById("task-" + task.id);
-        if (existing) existing.remove();
-        addTaskToDOM(task);
+
+        flipAnimate(() => {
+
+            const existing = document.getElementById("task-" + task.id);
+            if (existing) existing.remove();
+
+            addTaskToDOM(task);
+
+        });
+
     }
 
     function removeTask(id) {
@@ -115,7 +241,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     function createTask() {
         const input = document.getElementById("taskInput");
-        if (!input.value.trim()) return;
+        if (!input || !input.value.trim()) return;
 
         socket.send(JSON.stringify({
             type: "task_create",
@@ -154,30 +280,22 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     /* ============================
-       Theme Toggle (Persistent)
+       Theme Toggle
     ============================ */
 
     const themeToggle = document.getElementById("themeToggle");
-const iconContainer = document.getElementById("themeIcon");
+    const iconContainer = document.getElementById("themeIcon");
 
-if (themeToggle && iconContainer) {
+    if (themeToggle && iconContainer && typeof themeIconPath !== "undefined") {
 
-        // Load SVG from Django static
         fetch(themeIconPath)
-            .then(res => {
-                if (!res.ok) throw new Error("SVG not found");
-                return res.text();
-            })
-            .then(svg => {
-                iconContainer.innerHTML = svg;
-            })
+            .then(res => res.text())
+            .then(svg => iconContainer.innerHTML = svg)
             .catch(err => console.error(err));
 
-        // Load saved theme
         const savedTheme = localStorage.getItem("theme");
-        if (savedTheme) {
+        if (savedTheme)
             document.documentElement.setAttribute("data-theme", savedTheme);
-        }
 
         themeToggle.addEventListener("click", function () {
             const html = document.documentElement;
@@ -190,7 +308,7 @@ if (themeToggle && iconContainer) {
     }
 
     /* ============================
-       Create Button Event
+       Create Button
     ============================ */
 
     const btn = document.getElementById("createBtn");

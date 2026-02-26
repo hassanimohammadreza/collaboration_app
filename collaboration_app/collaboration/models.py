@@ -1,8 +1,14 @@
 from django.db import models
+from django.contrib.auth.models import User
 
 
 class Task(models.Model):
-
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name="tasks"
+    )
+    
     STATUS_CHOICES = [
         ("todo", "To Do"),
         ("in_progress", "In Progress"),

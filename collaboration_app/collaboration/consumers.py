@@ -7,7 +7,13 @@ from .models import Task
 class CollaborationConsumer(AsyncWebsocketConsumer):
 
     async def connect(self):
-        self.group_name = "collaboration_group"
+        self.user = self.scope["user"]
+        
+        if self.user.is_anonymous:
+            await self.close()
+            return
+        
+        self.group_name = f"user_{self.user.id}"
 
         await self.channel_layer.group_add(
             self.group_name,
@@ -16,18 +22,21 @@ class CollaborationConsumer(AsyncWebsocketConsumer):
 
         await self.accept()
 
-        # ارسال لیست اولیه تسک‌ها هنگام اتصال
-        tasks = await self.get_all_tasks()
+        tasks = await self.get_user_tasks()
+
         await self.send(text_data=json.dumps({
             "type": "task_list",
             "payload": tasks
         }))
 
+
     async def disconnect(self, close_code):
-        await self.channel_layer.group_discard(
-            self.group_name,
-            self.channel_name
-        )
+        if hasattr(self, "group_name"):
+            await self.channel_layer.group_discard(
+                self.group_name,
+                self.channel_name
+            )
+
 
     async def receive(self, text_data):
         data = json.loads(text_data)
@@ -40,12 +49,15 @@ class CollaborationConsumer(AsyncWebsocketConsumer):
 
         elif event_type == "task_update":
             task = await self.update_task(payload)
-            await self.broadcast("task_update", task)
+            if task:
+                await self.broadcast("task_update", task)
 
         elif event_type == "task_delete":
             task_id = payload.get("id")
-            await self.delete_task(task_id)
-            await self.broadcast("task_delete", {"id": task_id})
+            deleted = await self.delete_task(task_id)
+            if deleted:
+                await self.broadcast("task_delete", {"id": task_id})
+
 
     async def broadcast(self, event_type, payload):
         await self.channel_layer.group_send(
@@ -57,19 +69,22 @@ class CollaborationConsumer(AsyncWebsocketConsumer):
             }
         )
 
+
     async def send_event(self, event):
         await self.send(text_data=json.dumps({
             "type": event["event_type"],
             "payload": event["payload"]
         }))
 
+
     # =========================
-    # Database Methods
+    # Database Methods (Multi-user Secure)
     # =========================
 
     @sync_to_async
     def create_task(self, payload):
         task = Task.objects.create(
+            user=self.user,
             title=payload.get("title", ""),
             description=payload.get("description", ""),
             status=payload.get("status", "todo")
@@ -78,20 +93,32 @@ class CollaborationConsumer(AsyncWebsocketConsumer):
 
     @sync_to_async
     def update_task(self, payload):
-        task = Task.objects.get(id=payload.get("id"))
-        task.title = payload.get("title", task.title)
-        task.description = payload.get("description", task.description)
-        task.status = payload.get("status", task.status)
-        task.save()
-        return self.serialize_task(task)
+        try:
+            task = Task.objects.get(
+                id=payload.get("id"),
+                user=self.user
+            )
+            task.title = payload.get("title", task.title)
+            task.description = payload.get("description", task.description)
+            task.status = payload.get("status", task.status)
+            task.save()
+            return self.serialize_task(task)
+        except Task.DoesNotExist:
+            return None
 
     @sync_to_async
     def delete_task(self, task_id):
-        Task.objects.filter(id=task_id).delete()
+        deleted, _ = Task.objects.filter(
+            id=task_id,
+            user=self.user
+        ).delete()
+        return deleted > 0
 
     @sync_to_async
-    def get_all_tasks(self):
-        return [self.serialize_task(task) for task in Task.objects.all()]
+    def get_user_tasks(self):
+        tasks = Task.objects.filter(user=self.user).order_by("-created_at")
+        return [self.serialize_task(task) for task in tasks]
+
 
     def serialize_task(self, task):
         return {
