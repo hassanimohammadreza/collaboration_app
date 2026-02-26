@@ -7,7 +7,7 @@ A production-oriented realtime collaboration engine built with Django, WebSocket
 This project is not a simple task manager demo.
 It is being engineered as a scalable SaaS-ready infrastructure capable of powering multi-user collaboration platforms with realtime state synchronization and isolated event streams.
 
-The task board is the first implementation layer — the architecture is the real product.
+The task board is the first implementation layer, the architecture is the real product.
 
 ---
 
