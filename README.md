@@ -1,115 +1,184 @@
 # Realtime Collaboration Task Manager
 
-A realtime, event-driven task management backend built with Django and WebSockets.
+A realtime, event-driven task management system built with Django, WebSockets, and Redis.
 
-This project is designed as a foundation for a collaborative task management system
-where multiple users can interact with shared tasks in real-time without page refresh.
+This project is evolving into a scalable, SaaS-ready collaboration engine where multiple users can interact with tasks in real-time without page refresh.
+
+It is not a demo — it is being structured as a production-grade foundation.
+
+---
+
+## 📸 Screenshots
+
+### Light Theme
+![Light Theme](assets/images/board-light.png)
+
+### Dark Theme
+![Dark Theme](assets/images/board-dark.png)
 
 ---
 
 ## 🎯 Vision
 
-The goal of this project is to build a scalable realtime collaboration engine
-that can power:
+The goal is to build a scalable realtime collaboration platform capable of powering:
 
-- Shared task boards
-- Live status updates
-- Multi-user interaction
+- Multi-user task boards
+- Live state synchronization
 - Event-driven UI updates
+- Persistent Kanban workflows
 - Future SaaS-ready architecture
 
-This repository currently contains the core realtime infrastructure layer.
+The system is being developed incrementally with clean architecture principles.
 
 ---
 
 ## 🧠 Core Architecture
 
-The project is built around ASGI and WebSocket-based communication.
+Built on ASGI and WebSocket-based communication.
 
 ### Backend Stack
 
-- Django (application core)
-- Django Channels (ASGI & WebSocket support)
+- Django 6
+- Django Channels 4
 - Redis (channel layer backend)
-- Uvicorn / Daphne (ASGI servers)
-
-### Communication Flow
-
-Client → WebSocket → Channels Consumer → Channel Layer → Broadcast → Clients
-
-This architecture allows:
-
-- Real-time updates across multiple browser tabs
-- Scalable event broadcasting
-- Async message handling
-- Clean separation between HTTP and WebSocket protocols
+- Uvicorn (ASGI server)
+- Daphne (optional ASGI server)
+- Docker (service orchestration)
 
 ---
 
-## 🔌 Realtime Layer
+### Communication Flow
 
-The current implementation includes:
+Client  
+→ WebSocket  
+→ Channels Consumer  
+→ Redis Channel Layer  
+→ Group Broadcast  
+→ Connected Clients  
+
+This enables:
+
+- Real-time multi-tab synchronization
+- Async event processing
+- Horizontal scalability readiness
+- Separation of HTTP and WebSocket layers
+
+---
+
+## 🔌 Realtime Engine (Implemented)
 
 - ASGI configuration with `ProtocolTypeRouter`
 - WebSocket routing
 - Async consumer handling
 - Group-based broadcasting
-- Persistent message storage
-- Static file integration under ASGI
-
-This establishes a production-ready realtime foundation.
-
----
-
-## 🏗 Current State
-
-✅ WebSocket connection established (101 Switching Protocols)  
-✅ Realtime message broadcasting  
-✅ Redis-backed channel layer  
-✅ Static file handling under ASGI  
-✅ Modular project structure  
-
-The system is now ready to evolve into a full task management engine.
+- Redis-backed channel layer
+- Static file handling under ASGI
+- Dockerized Redis service
 
 ---
 
-## 🚀 Next Development Phases
+## 🎨 Frontend System (Implemented)
 
-Planned evolution:
-
-- Task model design
-- Event-based task operations (create / update / delete)
-- Role-based access logic
-- Multi-room / multi-board support
-- Frontend state synchronization
-- Production deployment architecture
+- Modular CSS architecture
+- Light / Dark theme (persistent via localStorage)
+- Drag & Drop task movement
+- Clean DOM structure
+- Scalable UI component styling
+- Realtime UI synchronization
 
 ---
 
-## 📌 Project Philosophy
+## 🏗 Current System State
 
-This project is being developed with:
+- ✅ WebSocket connection (101 Switching Protocols)
+- ✅ Realtime broadcasting
+- ✅ Redis-backed channel layer
+- ✅ Docker service integration
+- ✅ Modular CSS architecture
+- ✅ Light / Dark theme system
+- ✅ Drag & Drop task movement
+- ✅ Clean Git workflow
 
-- Clean architecture principles
-- Scalable realtime patterns
-- Git-based structured workflow
-- Incremental feature development
+The system is now transitioning from infrastructure phase to product evolution phase.
 
-It is not just a demo — it is intended to grow into a structured, scalable backend system.
+---
+
+# 🚀 Next Development Phases (Roadmap)
+
+## Phase 1 — Multi-User Foundation
+
+- Django authentication system
+- Login / Logout flow
+- User-based task ownership
+- WebSocket authentication enforcement
+- Group-per-user architecture
+- Multi-user ready channel isolation
+
+---
+
+## Phase 2 — Realtime Resilience
+
+- Auto WebSocket reconnect mechanism
+- Connection state indicator (Connected / Reconnecting / Offline)
+- Graceful handling of Redis / server restarts
+
+---
+
+## Phase 3 — UX System Upgrade
+
+- Toast notification system
+- Event-based feedback UI
+- User action confirmations
+- Visual system feedback layer
+
+---
+
+## Phase 4 — Kanban Persistence
+
+- Order index per task
+- Drag reorder persistence in database
+- Realtime reorder sync
+- Backend order normalization
+
+---
+
+## Phase 5 — UI Polish Layer
+
+- FLIP animation for smooth reorder
+- Micro-interactions
+- Transition system optimization
+
+---
+
+## 📐 Architectural Direction
+
+The system is being structured with:
+
+- Event-driven design
+- Separation of concerns
+- Scalable channel grouping
+- Modular frontend architecture
+- Incremental feature layering
+- Clean Git-based workflow
 
 ---
 
 ## 🛠 Development Status
 
 Active development.
-Initial realtime core completed.
+
+Realtime infrastructure completed.  
+Transitioning into multi-user and product-layer expansion.
 
 ---
 
-## 🚀 Tech Stack
+## 🔮 Long-Term Direction
 
-- Django 6
-- Django Channels 4
-- Redis
-- Uvicorn (ASGI)
-- Daphne (optional ASGI server)
+Future possibilities:
+
+- Team-based boards
+- Role-based permissions
+- Invite system
+- Board-level isolation
+- SaaS deployment architecture
+- Horizontal scaling strategy
