@@ -16,9 +16,6 @@ The task board is the first implementation layer, the architecture is the real p
 ### Light Theme
 ![Light Theme](assets/images/board-light.png)
 
-### Dark Theme
-![Dark Theme](assets/images/board-dark.png)
-
 ### Login
 ![Login](assets/images/login.png)
 
